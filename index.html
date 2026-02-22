@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NNN Dash — QSR Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Epilogue:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary:       #0A84FF;
+    --primary-dark:  #0066CC;
+    --success:       #30D158;
+    --warning:       #FF9F0A;
+    --danger:        #FF453A;
+    --text-primary:  #1C1C1E;
+    --text-secondary:#6E6E73;
+    --border:        #E5E5EA;
+    --bg:            #F2F2F7;
+    --surface:       #FFFFFF;
+    --card-bg:       #FFFFFF;
+    --shadow:        0 2px 12px rgba(0,0,0,0.08);
+    --shadow-lg:     0 8px 32px rgba(0,0,0,0.12);
+    --radius:        14px;
+    --radius-sm:     10px;
+    /* lease urgency */
+    --green-bg:  rgba(48,209,88,0.10);
+    --green-bd:  rgba(48,209,88,0.35);
+    --yellow-bg: rgba(255,159,10,0.10);
+    --yellow-bd: rgba(255,159,10,0.45);
+    --red-bg:    rgba(255,69,58,0.10);
+    --red-bd:    rgba(255,69,58,0.45);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  /* ── NAV ──────────────────────────────────── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1.5rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+  .topbar-brand {
+    font-family: 'Epilogue', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .topbar-brand span { color: var(--primary); }
+  .back-btn {
+    display: none;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.4rem 0.6rem;
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+  .back-btn:hover { background: rgba(10,132,255,0.08); }
+
+  /* ── PAGES ────────────────────────────────── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── PORTFOLIO PAGE ───────────────────────── */
+  .portfolio-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .portfolio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .portfolio-header h1 {
+    font-family: 'Epilogue', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 800;
+  }
+  .portfolio-header p { color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.2rem; }
+
+  .add-prop-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 1.1rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .add-prop-btn:hover { background: var(--primary-dark); }
+
+  /* Summary stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .stat-card {
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.1rem;
+    box-shadow: var(--shadow);
+  }
+  .stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.3rem;
+  }
+  .stat-value {
+    font-family: 'Epilogue', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+  .stat-value.green  { color: var(--success); }
+  .stat-value.blue   { color: var(--primary); }
+  .stat-value.orange { color: var(--warning); }
+
+  /* Property cards grid */
+  .prop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+  .prop-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+    border: 2px solid var(--border);
+    transition: box-shadow 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+  .prop-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+  .prop-card.lease-red    { border-color: rgba(255,69,58,0.5); }
+  .prop-card.lease-yellow { border-color: rgba(255,159,10,0.5); }
+  .prop-card.lease-green  { border-color: rgba(48,209,88,0.35); }
+
+  .prop-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+  .prop-tenant {
+    font-family: 'Epilogue', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+  .prop-type-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(10,132,255,0.1);
+    color: var(--primary);
+    text-transform: capitalize;
+  }
+  .prop-address {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+  .prop-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+  }
+  .prop-metric { }
+  .prop-metric-label { font-size: 0.72rem; color: var(--text-secondary); font-weight: 500; }
+  .prop-metric-val { font-family: 'Epilogue', sans-serif; font-size: 1.05rem; font-weight: 700; }
+
+  .lease-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 0.85rem;
+  }
+  .lease-badge.green  { background: var(--green-bg);  color: #1a7a35; border: 1.5px solid var(--green-bd); }
+  .lease-badge.yellow { background: var(--yellow-bg); color: #a05c00; border: 1.5px solid var(--yellow-bd); }
+  .lease-badge.red    { background: var(--red-bg);    color: #c0392b; border: 1.5px solid var(--red-bd); }
+
+  .view-btn {
+    width: 100%;
+    padding: 0.6rem;
+    background: transparent;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--primary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .view-btn:hover { background: rgba(10,132,255,0.07); border-color: var(--primary); }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--text-secondary);
+  }
+  .empty-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+  .empty-title { font-family: 'Epilogue', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; }
+  .empty-sub { font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+  /* ── FORM PAGE ────────────────────────────── */
+  .form-wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+  }
+  .form-wrap h1 {
+    font-family: 'Epilogue', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 1.25rem;
+  }
+  .form-section {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+  }
+  .form-section-title {
+    font-family: 'Epilogue', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 1rem;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+  .form-group { margin-bottom: 0.75rem; }
+  .form-group:last-child { margin-bottom: 0; }
+  label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+  }
+  input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-family: inherit;
+    background: var(--bg);
+    color: var(--text-primary);
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: var(--surface); }
+  textarea { resize: vertical; min-height: 70px; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+  }
+  .toggle-label { font-size: 0.9rem; font-weight: 500; }
+  .toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; inset: 0;
+    background: var(--border);
+    border-radius: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 20px; height: 20px;
+    left: 3px; top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .toggle input:checked + .toggle-slider { background: var(--primary); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+  .type-toggle {
+    display: flex;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .type-toggle button {
+    flex: 1;
+    padding: 0.6rem;
+    border: none;
+    background: transparent;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .type-toggle button.active { background: var(--primary); color: white; }
+
+  .form-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+  .btn-primary {
+    flex: 1;
+    padding: 0.85rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-secondary {
+    padding: 0.85rem 1.25rem;
+    background: transparent;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+  .btn-danger {
+    padding: 0.85rem 1.1rem;
+    background: transparent;
+    border: 1.5px solid var(--danger);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    color: var(--danger);
+    transition: all 0.2s;
+  }
+  .btn-danger:hover { background: var(--red-bg); }
+
+  .refi-section { display: none; }
+  .refi-section.show { display: block; }
+  .financing-section { display: none; }
+  .financing-section.show { display: block; }
+
+  /* ── DETAIL PAGE ──────────────────────────── */
+  .detail-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+  }
+  .detail-header {
+    margin-bottom: 1.25rem;
+  }
+  .detail-header h1 {
+    font-family: 'Epilogue', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+  }
+  .detail-header .address { color: var(--text-secondary); font-size: 0.88rem; margin-top: 0.2rem; }
+
+  /* KPI bar */
+  .kpi-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .kpi-card {
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.1rem;
+    color: white;
+    position: relative;
+  }
+  .kpi-card.green  { background: linear-gradient(135deg, #30D158, #25a548); }
+  .kpi-card.blue   { background: linear-gradient(135deg, #0A84FF, #005fcc); }
+  .kpi-card.purple { background: linear-gradient(135deg, #BF5AF2, #9b39d6); }
+  .kpi-card.orange { background: linear-gradient(135deg, #FF9F0A, #d47c00); }
+  .kpi-card.teal   { background: linear-gradient(135deg, #5AC8FA, #3aabe0); }
+  .kpi-label { font-size: 0.75rem; font-weight: 600; opacity: 0.88; margin-bottom: 0.3rem; }
+  .kpi-value { font-family: 'Epilogue', sans-serif; font-size: 1.6rem; font-weight: 800; }
+  .kpi-sub   { font-size: 0.75rem; opacity: 0.75; margin-top: 0.2rem; }
+
+  /* Detail two-column layout */
+  .detail-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 1.25rem;
+    align-items: start;
+  }
+  @media (max-width: 820px) {
+    .detail-layout { grid-template-columns: 1fr; }
+    .form-row, .form-row.three { grid-template-columns: 1fr; }
+  }
+
+  /* Result panels */
+  .result-panel {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1rem;
+  }
+  .result-panel h3 {
+    font-family: 'Epilogue', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+  }
+
+  /* Metric grid inside result panels */
+  .metric-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+  .metric-item {
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 0.85rem;
+  }
+  .metric-item.highlight {
+    background: rgba(10,132,255,0.07);
+    border: 1.5px solid rgba(10,132,255,0.2);
+  }
+  .metric-item.highlight-green {
+    background: rgba(48,209,88,0.08);
+    border: 1.5px solid rgba(48,209,88,0.3);
+  }
+  .metric-item.span2 { grid-column: span 2; }
+  .metric-lbl { font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.2rem; }
+  .metric-val { font-family: 'Epilogue', sans-serif; font-size: 1.05rem; font-weight: 700; }
+  .metric-val.green  { color: var(--success); }
+  .metric-val.red    { color: var(--danger); }
+  .metric-val.orange { color: var(--warning); }
+
+  /* Projections table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+  thead th {
+    text-align: right;
+    padding: 0.6rem 0.75rem;
+    background: var(--bg);
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  thead th:first-child { text-align: left; }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:hover { background: var(--bg); }
+  tbody tr.refi-yr { background: rgba(255,159,10,0.06); }
+  td {
+    text-align: right;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.83rem;
+    white-space: nowrap;
+  }
+  td:first-child { text-align: left; font-weight: 600; }
+  td.pos { color: var(--success); font-weight: 600; }
+  td.neg { color: var(--danger); font-weight: 600; }
+  .refi-tag {
+    display: inline-block;
+    background: var(--warning);
+    color: white;
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    margin-left: 0.35rem;
+    vertical-align: middle;
+  }
+
+  /* Lease timeline */
+  .lease-timeline { position: relative; margin-top: 0.75rem; }
+  .timeline-track {
+    height: 10px;
+    background: var(--bg);
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 0.5rem;
+  }
+  .timeline-filled {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.4s;
+  }
+  .timeline-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+  }
+  .timeline-bumps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .bump-chip {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(10,132,255,0.1);
+    color: var(--primary);
+    border: 1px solid rgba(10,132,255,0.25);
+  }
+
+  /* Lease tracker countdown */
+  .countdown-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+  .countdown-card {
+    border-radius: var(--radius-sm);
+    padding: 0.85rem;
+    text-align: center;
+  }
+  .countdown-card.green  { background: var(--green-bg);  border: 1.5px solid var(--green-bd); }
+  .countdown-card.yellow { background: var(--yellow-bg); border: 1.5px solid var(--yellow-bd); }
+  .countdown-card.red    { background: var(--red-bg);    border: 1.5px solid var(--red-bd); }
+  .countdown-card.blue   { background: rgba(10,132,255,0.08); border: 1.5px solid rgba(10,132,255,0.25); }
+  .countdown-num { font-family: 'Epilogue', sans-serif; font-size: 1.5rem; font-weight: 800; }
+  .countdown-unit { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .countdown-lbl { font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.2rem; }
+  .green .countdown-num  { color: #1a7a35; }
+  .yellow .countdown-num { color: #a05c00; }
+  .red .countdown-num    { color: #c0392b; }
+  .blue .countdown-num   { color: var(--primary); }
+
+  /* Return summary panel */
+  .return-panel {
+    background: linear-gradient(135deg, #0A84FF 0%, #005fcc 100%);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    color: white;
+    margin-bottom: 1rem;
+  }
+  .return-panel h3 { font-family: 'Epilogue', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
+  .return-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .return-item {
+    background: rgba(255,255,255,0.12);
+    border-radius: var(--radius-sm);
+    padding: 0.85rem;
+  }
+  .return-item.highlight { background: rgba(255,255,255,0.22); border: 1.5px solid rgba(255,255,255,0.35); }
+  .return-lbl { font-size: 0.75rem; opacity: 0.85; margin-bottom: 0.25rem; }
+  .return-val { font-family: 'Epilogue', sans-serif; font-size: 1.15rem; font-weight: 800; }
+  .return-sub { font-size: 0.68rem; opacity: 0.7; font-family: monospace; margin-top: 0.25rem; }
+
+  /* Input panel within detail */
+  .input-panel {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+  }
+  .input-panel .form-section-title { margin-top: 1rem; }
+  .input-panel .form-section-title:first-child { margin-top: 0; }
+  .input-panel input, .input-panel select { background: var(--bg); }
+  .input-panel input:focus, .input-panel select:focus { background: var(--surface); }
+
+  .detail-actions { display: flex; gap: 0.6rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+
+  /* ── MODAL ────────────────────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal h2 { font-family: 'Epilogue', sans-serif; font-size: 1.2rem; font-weight: 800; margin-bottom: 0.75rem; }
+  .modal p  { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.25rem; }
+  .modal-actions { display: flex; gap: 0.6rem; justify-content: flex-end; }
+
+  /* ── ANIMATIONS ───────────────────────────── */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .page.active { animation: fadeIn 0.25s ease both; }
+
+  /* ── RESPONSIVE ───────────────────────────── */
+  @media (max-width: 600px) {
+    .stats-bar { grid-template-columns: 1fr 1fr; }
+    .kpi-bar   { grid-template-columns: 1fr 1fr; }
+    .return-grid, .metric-grid, .countdown-grid { grid-template-columns: 1fr; }
+    .metric-item.span2 { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ TOPBAR ═══════════════════ -->
+<header class="topbar">
+  <button class="back-btn" id="backBtn" onclick="goPortfolio()">← Portfolio</button>
+  <div class="topbar-brand">NNN<span>Dash</span></div>
+  <div style="width:80px"></div><!-- spacer -->
+</header>
+
+<!-- ═══════════════════ PORTFOLIO PAGE ═══════════════════ -->
+<div class="page active" id="pagePortfolio">
+  <div class="portfolio-wrap">
+    <div class="portfolio-header">
+      <div>
+        <h1>QSR Portfolio</h1>
+        <p>Triple Net Lease Properties</p>
+      </div>
+      <button class="add-prop-btn" onclick="goForm(null)">+ Add Property</button>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-card"><div class="stat-label">Properties</div><div class="stat-value blue" id="statCount">0</div></div>
+      <div class="stat-card"><div class="stat-label">Total Equity</div><div class="stat-value" id="statEquity">—</div></div>
+      <div class="stat-card"><div class="stat-label">Blended CoC</div><div class="stat-value green" id="statCoc">—</div></div>
+      <div class="stat-card"><div class="stat-label">Avg Equity Multiple</div><div class="stat-value blue" id="statMult">—</div></div>
+      <div class="stat-card"><div class="stat-label">Nearest Expiry</div><div class="stat-value orange" id="statNearest">—</div></div>
+    </div>
+
+    <!-- Property grid -->
+    <div class="prop-grid" id="propGrid"></div>
+
+    <!-- Empty state -->
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="empty-icon">🏪</div>
+      <div class="empty-title">No properties yet</div>
+      <div class="empty-sub">Add your first NNN QSR property to get started</div>
+      <button class="add-prop-btn" onclick="goForm(null)">+ Add Property</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ FORM PAGE ═══════════════════ -->
+<div class="page" id="pageForm">
+  <div class="form-wrap">
+    <h1 id="formTitle">Add Property</h1>
+
+    <!-- Property Info -->
+    <div class="form-section">
+      <div class="form-section-title">Property Info</div>
+      <div class="form-group"><label>Tenant Name</label><input type="text" id="fTenant" placeholder="e.g. McDonald's"></div>
+      <div class="form-group"><label>Property Address</label><input type="text" id="fAddress" placeholder="123 Main St, City, ST"></div>
+      <div class="form-group">
+        <label>Property Type</label>
+        <div class="type-toggle" id="propTypeToggle">
+          <button onclick="setPropType('freestanding')" class="active" data-type="freestanding">Freestanding</button>
+          <button onclick="setPropType('inline')" data-type="inline">Inline</button>
+          <button onclick="setPropType('pad')" data-type="pad">Pad Site</button>
+        </div>
+        <input type="hidden" id="fPropType" value="freestanding">
+      </div>
+    </div>
+
+    <!-- Acquisition -->
+    <div class="form-section">
+      <div class="form-section-title">Acquisition</div>
+      <div class="form-row">
+        <div class="form-group"><label>Purchase Price ($)</label><input type="number" id="fPrice" placeholder="2500000" value="2500000"></div>
+        <div class="form-group"><label>Cap Rate (%)</label><input type="number" id="fCapRate" placeholder="6.75" step="0.05" value="6.75"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Closing Costs (%)</label><input type="number" id="fClosing" placeholder="2.5" step="0.1" value="2.5"></div>
+        <div class="form-group"><label>Selling Costs (%)</label><input type="number" id="fSelling" placeholder="2.0" step="0.1" value="2.0"></div>
+      </div>
+      <div class="form-group">
+        <label>Purchase Type</label>
+        <div class="type-toggle" id="purchaseTypeToggle">
+          <button onclick="setPurchaseType('financed')" class="active" data-pt="financed">Financed</button>
+          <button onclick="setPurchaseType('all-cash')" data-pt="all-cash">All Cash</button>
+        </div>
+        <input type="hidden" id="fPurchaseType" value="financed">
+      </div>
+    </div>
+
+    <!-- Financing -->
+    <div class="form-section financing-section show" id="financingSection">
+      <div class="form-section-title">Financing</div>
+      <div class="form-row three">
+        <div class="form-group"><label>LTV (%)</label><input type="number" id="fLtv" value="65" step="1"></div>
+        <div class="form-group"><label>Interest Rate (%)</label><input type="number" id="fRate" value="6.0" step="0.1"></div>
+        <div class="form-group"><label>Amort. Period (yrs)</label><input type="number" id="fLoanTerm" value="25"></div>
+      </div>
+      <div class="toggle-row">
+        <label class="toggle"><input type="checkbox" id="fRefi" onchange="toggleRefi()"><span class="toggle-slider"></span></label>
+        <span class="toggle-label">Enable Refinance</span>
+      </div>
+      <div class="refi-section" id="refiSection">
+        <div class="form-row">
+          <div class="form-group"><label>Refinance Year</label><input type="number" id="fRefiYear" value="5"></div>
+          <div class="form-group"><label>New Rate (%)</label><input type="number" id="fRefiRate" value="5.0" step="0.1"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>New LTV (%)</label><input type="number" id="fRefiLtv" value="65" step="1"></div>
+          <div class="form-group"><label>Refi Closing Costs (%)</label><input type="number" id="fRefiClose" value="1.5" step="0.1"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lease -->
+    <div class="form-section">
+      <div class="form-section-title">Lease</div>
+      <div class="form-row">
+        <div class="form-group"><label>Annual Rent / NOI ($)</label><input type="number" id="fRent" placeholder="168750"></div>
+        <div class="form-group"><label>Lease Start Date</label><input type="date" id="fLeaseStart"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Lease Expiration Date</label><input type="date" id="fLeaseExp"></div>
+        <div class="form-group"><label>Remaining Term (yrs)</label><input type="number" id="fLeaseRemaining" value="15" step="1"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Rent Bump Every (yrs)</label><input type="number" id="fBumpYears" value="5" step="1"></div>
+        <div class="form-group"><label>Rent Bump Amount (%)</label><input type="number" id="fBumpPct" value="10" step="0.5"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label># of Renewal Options</label><input type="number" id="fOptions" value="2" step="1"></div>
+        <div class="form-group"><label>Years Per Option</label><input type="number" id="fOptionYrs" value="5" step="1"></div>
+      </div>
+      <div class="form-group"><label>Cap Rate Expansion Per Year (%)</label><input type="number" id="fCapExp" value="0.15" step="0.05">
+        <small style="color:var(--text-secondary);font-size:0.75rem;margin-top:0.25rem;display:block;">As lease burns off, cap rate expands (value declines)</small>
+      </div>
+    </div>
+
+    <!-- Operating -->
+    <div class="form-section">
+      <div class="form-section-title">Operating Assumptions</div>
+      <div class="form-row">
+        <div class="form-group"><label>Hold Period (yrs)</label><input type="number" id="fHold" value="10"></div>
+        <div class="form-group"><label>Exit Cap Rate (%)</label><input type="number" id="fExitCap" value="7.0" step="0.1"></div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="form-section">
+      <div class="form-section-title">Notes</div>
+      <div class="form-group"><textarea id="fNotes" placeholder="Franchisee info, guarantee type, market notes…"></textarea></div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="goPortfolio()">Cancel</button>
+      <button class="btn-primary" onclick="saveProperty()">Save Property</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ DETAIL PAGE ═══════════════════ -->
+<div class="page" id="pageDetail">
+  <div class="detail-wrap">
+    <div class="detail-header">
+      <h1 id="detailTenant">—</h1>
+      <div class="address" id="detailAddress">—</div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="detail-actions">
+      <button class="btn-secondary" onclick="editCurrentProperty()">✏️ Edit Property</button>
+      <button class="btn-danger"    onclick="confirmDelete()">Delete</button>
+    </div>
+
+    <!-- KPI bar -->
+    <div class="kpi-bar" id="kpiBar">
+      <div class="kpi-card green">  <div class="kpi-label">Year 1 Cash-on-Cash</div><div class="kpi-value" id="kCoc">—</div><div class="kpi-sub" id="kCocSub">—</div></div>
+      <div class="kpi-card blue">   <div class="kpi-label">Levered IRR</div>       <div class="kpi-value" id="kIrr">—</div><div class="kpi-sub" id="kIrrSub">—</div></div>
+      <div class="kpi-card purple">  <div class="kpi-label">Equity Multiple</div>  <div class="kpi-value" id="kMult">—</div></div>
+      <div class="kpi-card orange">  <div class="kpi-label">Unlevered IRR</div>    <div class="kpi-value" id="kUIrr">—</div></div>
+      <div class="kpi-card teal">    <div class="kpi-label">Avg Cash-on-Cash</div> <div class="kpi-value" id="kAvgCoc">—</div></div>
+    </div>
+
+    <div class="detail-layout">
+      <!-- LEFT: results panels -->
+      <div id="resultsCol">
+
+        <!-- Lease Tracker -->
+        <div class="result-panel">
+          <h3>📅 Lease Tracker</h3>
+          <div class="countdown-grid" id="countdownGrid"><!-- JS --></div>
+          <div style="margin-top:0.75rem;" id="renewalInfo"></div>
+        </div>
+
+        <!-- Lease Timeline -->
+        <div class="result-panel">
+          <h3>📊 Lease Timeline</h3>
+          <div class="lease-timeline">
+            <div class="timeline-track"><div class="timeline-filled" id="timelineFilled" style="width:0%; background:var(--success);"></div></div>
+            <div class="timeline-labels"><span id="tlStart">—</span><span id="tlNow">Today</span><span id="tlExp">—</span></div>
+            <div class="timeline-bumps" id="bumpChips"></div>
+          </div>
+        </div>
+
+        <!-- Acquisition Summary -->
+        <div class="result-panel">
+          <h3>🏢 Acquisition Summary</h3>
+          <div class="metric-grid" id="acqGrid"><!-- JS --></div>
+        </div>
+
+        <!-- Debt Service -->
+        <div class="result-panel" id="debtPanel">
+          <h3>🏦 Debt Service</h3>
+          <div class="metric-grid" id="debtGrid"><!-- JS --></div>
+        </div>
+
+        <!-- Exit Analysis -->
+        <div class="result-panel">
+          <h3>🚪 Exit Analysis</h3>
+          <div class="metric-grid" id="exitGrid"><!-- JS --></div>
+        </div>
+
+        <!-- Returns -->
+        <div class="return-panel">
+          <h3>📈 Investment Return Summary</h3>
+          <div class="return-grid" id="returnGrid"><!-- JS --></div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: projections table + notes -->
+      <div>
+        <div class="result-panel">
+          <h3>📋 Annual Cash Flow Projections</h3>
+          <div class="table-wrap"><table id="projTable"><tbody></tbody></table></div>
+        </div>
+        <div class="result-panel" id="notesPanel" style="display:none;">
+          <h3>📝 Notes</h3>
+          <p id="notesText" style="font-size:0.9rem; color:var(--text-secondary); line-height:1.6;"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ DELETE MODAL ═══════════════════ -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h2>Delete Property?</h2>
+    <p>This will permanently remove this property from your portfolio. This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-danger" onclick="deleteProperty()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════════
+const STORAGE_KEY = 'nnn_properties';
+let properties = [];
+let currentId  = null; // property being viewed/edited
+
+function load()  { try { properties = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { properties = []; } }
+function save()  { localStorage.setItem(STORAGE_KEY, JSON.stringify(properties)); }
+function getById(id) { return properties.find(p => p.id === id); }
+
+// ══════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('backBtn').style.display = (id === 'pagePortfolio') ? 'none' : 'flex';
+  window.scrollTo(0, 0);
+}
+
+function goPortfolio() { showPage('pagePortfolio'); renderPortfolio(); }
+
+function goForm(id) {
+  currentId = id;
+  document.getElementById('formTitle').textContent = id ? 'Edit Property' : 'Add Property';
+  if (id) fillForm(getById(id));
+  else     resetForm();
+  showPage('pageForm');
+}
+
+function goDetail(id) {
+  currentId = id;
+  renderDetail(getById(id));
+  showPage('pageDetail');
+}
+
+// ══════════════════════════════════════════════════════
+//  FORM HELPERS
+// ══════════════════════════════════════════════════════
+function v(id) { return document.getElementById(id).value; }
+function n(id) { return parseFloat(v(id)) || 0; }
+function d(id) { return v(id); }
+
+function setPropType(t) {
+  document.getElementById('fPropType').value = t;
+  document.querySelectorAll('#propTypeToggle button').forEach(b => b.classList.toggle('active', b.dataset.type === t));
+}
+function setPurchaseType(t) {
+  document.getElementById('fPurchaseType').value = t;
+  document.querySelectorAll('#purchaseTypeToggle button').forEach(b => b.classList.toggle('active', b.dataset.pt === t));
+  document.getElementById('financingSection').classList.toggle('show', t === 'financed');
+}
+function toggleRefi() {
+  document.getElementById('refiSection').classList.toggle('show', document.getElementById('fRefi').checked);
+}
+
+function resetForm() {
+  ['fTenant','fAddress','fNotes','fLeaseStart','fLeaseExp'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fPrice').value = '2500000';
+  document.getElementById('fCapRate').value = '6.75';
+  document.getElementById('fClosing').value = '2.5';
+  document.getElementById('fSelling').value = '2.0';
+  document.getElementById('fLtv').value = '65';
+  document.getElementById('fRate').value = '6.0';
+  document.getElementById('fLoanTerm').value = '25';
+  document.getElementById('fLeaseRemaining').value = '15';
+  document.getElementById('fBumpYears').value = '5';
+  document.getElementById('fBumpPct').value = '10';
+  document.getElementById('fOptions').value = '2';
+  document.getElementById('fOptionYrs').value = '5';
+  document.getElementById('fCapExp').value = '0.15';
+  document.getElementById('fHold').value = '10';
+  document.getElementById('fExitCap').value = '7.0';
+  document.getElementById('fRefiYear').value = '5';
+  document.getElementById('fRefiRate').value = '5.0';
+  document.getElementById('fRefiLtv').value = '65';
+  document.getElementById('fRefiClose').value = '1.5';
+  document.getElementById('fRefi').checked = false;
+  document.getElementById('fRent').value = '';
+  toggleRefi();
+  setPropType('freestanding');
+  setPurchaseType('financed');
+}
+
+function fillForm(p) {
+  document.getElementById('fTenant').value       = p.tenant || '';
+  document.getElementById('fAddress').value      = p.address || '';
+  document.getElementById('fNotes').value        = p.notes || '';
+  document.getElementById('fPrice').value        = p.purchasePrice || '';
+  document.getElementById('fCapRate').value      = p.capRate || '';
+  document.getElementById('fClosing').value      = p.closingCosts || '';
+  document.getElementById('fSelling').value      = p.sellingCosts || '';
+  document.getElementById('fLtv').value          = p.ltv || '';
+  document.getElementById('fRate').value         = p.interestRate || '';
+  document.getElementById('fLoanTerm').value     = p.loanTerm || '';
+  document.getElementById('fLeaseStart').value   = p.leaseStart || '';
+  document.getElementById('fLeaseExp').value     = p.leaseExpiration || '';
+  document.getElementById('fLeaseRemaining').value = p.leaseTermRemaining || '';
+  document.getElementById('fBumpYears').value    = p.rentBumpYears || '';
+  document.getElementById('fBumpPct').value      = p.rentBumpPct || '';
+  document.getElementById('fOptions').value      = p.renewalOptions || '';
+  document.getElementById('fOptionYrs').value    = p.renewalYearsEach || '';
+  document.getElementById('fCapExp').value       = p.capRateExpansionPerYear || '';
+  document.getElementById('fHold').value         = p.holdPeriod || '';
+  document.getElementById('fExitCap').value      = p.exitCapRate || '';
+  document.getElementById('fRefi').checked       = !!p.refinance;
+  document.getElementById('fRefiYear').value     = p.refiYear || '';
+  document.getElementById('fRefiRate').value     = p.refiRate || '';
+  document.getElementById('fRefiLtv').value      = p.refiLtv || '';
+  document.getElementById('fRefiClose').value    = p.refiClosingCosts || '';
+  document.getElementById('fRent').value         = p.annualRent || '';
+  setPropType(p.propertyType || 'freestanding');
+  setPurchaseType(p.purchaseType || 'financed');
+  toggleRefi();
+}
+
+function readForm() {
+  return {
+    tenant:                 v('fTenant'),
+    address:                v('fAddress'),
+    propertyType:           v('fPropType'),
+    purchasePrice:          n('fPrice'),
+    capRate:                n('fCapRate'),
+    closingCosts:           n('fClosing'),
+    sellingCosts:           n('fSelling'),
+    purchaseType:           v('fPurchaseType'),
+    ltv:                    n('fLtv'),
+    interestRate:           n('fRate'),
+    loanTerm:               n('fLoanTerm'),
+    annualRent:             n('fRent'),
+    leaseStart:             d('fLeaseStart'),
+    leaseExpiration:        d('fLeaseExp'),
+    leaseTermRemaining:     n('fLeaseRemaining'),
+    rentBumpYears:          n('fBumpYears'),
+    rentBumpPct:            n('fBumpPct'),
+    renewalOptions:         n('fOptions'),
+    renewalYearsEach:       n('fOptionYrs'),
+    capRateExpansionPerYear:n('fCapExp'),
+    holdPeriod:             n('fHold'),
+    exitCapRate:            n('fExitCap'),
+    refinance:              document.getElementById('fRefi').checked,
+    refiYear:               n('fRefiYear'),
+    refiRate:               n('fRefiRate'),
+    refiLtv:                n('fRefiLtv'),
+    refiClosingCosts:       n('fRefiClose'),
+    notes:                  v('fNotes'),
+  };
+}
+
+function saveProperty() {
+  const data = readForm();
+  if (!data.tenant) { alert('Please enter a tenant name.'); return; }
+  if (!data.purchasePrice) { alert('Please enter a purchase price.'); return; }
+  if (currentId) {
+    const idx = properties.findIndex(p => p.id === currentId);
+    if (idx !== -1) { properties[idx] = { ...properties[idx], ...data }; }
+  } else {
+    properties.push({ id: Date.now(), ...data });
+  }
+  save();
+  goPortfolio();
+}
+
+function editCurrentProperty() { goForm(currentId); }
+
+// ══════════════════════════════════════════════════════
+//  CALCULATION ENGINE (ported from React model)
+// ══════════════════════════════════════════════════════
+function calcIRR(cashFlows) {
+  let irr = 0.1;
+  for (let i = 0; i < 100; i++) {
+    let npv = 0, dnpv = 0;
+    cashFlows.forEach((cf, t) => {
+      npv  += cf / Math.pow(1 + irr, t);
+      dnpv += -t * cf / Math.pow(1 + irr, t + 1);
+    });
+    const next = irr - npv / dnpv;
+    if (Math.abs(next - irr) < 0.0001) return next * 100;
+    irr = next;
+    if (!isFinite(irr)) return NaN;
+  }
+  return irr * 100;
+}
+
+function calculateAll(p) {
+  const isAllCash = p.purchaseType === 'all-cash';
+  // Derive NOI: prefer explicit annualRent, fallback to capRate × price
+  const yearOneNOI = p.annualRent > 0 ? p.annualRent : p.purchasePrice * (p.capRate / 100);
+  const loanAmount = isAllCash ? 0 : p.purchasePrice * (p.ltv / 100);
+  const equity     = p.purchasePrice - loanAmount;
+  const totalClosing = p.purchasePrice * (p.closingCosts / 100);
+  const totalInvested = equity + totalClosing;
+
+  // Debt service
+  let monthlyPmt = 0, annualDS = 0;
+  if (!isAllCash && loanAmount > 0) {
+    const mr = (p.interestRate / 100) / 12;
+    const np = p.loanTerm * 12;
+    monthlyPmt = loanAmount * (mr * Math.pow(1 + mr, np)) / (Math.pow(1 + mr, np) - 1);
+    annualDS = monthlyPmt * 12;
+  }
+
+  const projections = [];
+  let loanBal = loanAmount;
+  let curMonthPmt = monthlyPmt;
+  let curAnnualDS = annualDS;
+  const bumpYears = p.rentBumpYears || 5;
+  const bumpPct   = p.rentBumpPct   || 10;
+
+  for (let yr = 1; yr <= p.holdPeriod; yr++) {
+    // Refinance
+    const isRefi = !isAllCash && p.refinance && yr === p.refiYear;
+    if (isRefi) {
+      const newLoan = p.purchasePrice * (p.refiLtv / 100);
+      const newMR   = (p.refiRate / 100) / 12;
+      const remYrs  = p.loanTerm - (yr - 1);
+      const newNP   = remYrs * 12;
+      curMonthPmt = newLoan * (newMR * Math.pow(1 + newMR, newNP)) / (Math.pow(1 + newMR, newNP) - 1);
+      curAnnualDS = curMonthPmt * 12;
+      loanBal = newLoan;
+    }
+
+    // NOI with rent bumps
+    const bumps = Math.floor((yr - 1) / bumpYears);
+    const noi   = yearOneNOI * Math.pow(1 + bumpPct / 100, bumps);
+
+    // Principal/interest tracking
+    let annPrincipal = 0, annInterest = 0;
+    if (!isAllCash) {
+      const mr = yr < p.refiYear ? (p.interestRate / 100) / 12 : (p.refiRate / 100) / 12;
+      for (let m = 0; m < 12; m++) {
+        const intPmt  = loanBal * mr;
+        const prinPmt = curMonthPmt - intPmt;
+        annPrincipal += prinPmt;
+        annInterest  += intPmt;
+        loanBal -= prinPmt;
+      }
+    }
+    const cashFlow = noi - curAnnualDS;
+    const dscr     = isAllCash ? null : noi / curAnnualDS;
+    projections.push({ year: yr, noi, cashFlow, debtService: curAnnualDS, dscr, loanBalance: loanBal + annPrincipal, principalPayment: annPrincipal, isRefi });
+  }
+
+  // Exit
+  const exitBumps = Math.floor((p.holdPeriod - 1) / bumpYears);
+  const exitNOI   = yearOneNOI * Math.pow(1 + bumpPct / 100, exitBumps);
+  const leaseAtExit = p.leaseTermRemaining - p.holdPeriod;
+  const calcExitCap = p.capRate + (p.holdPeriod * p.capRateExpansionPerYear);
+  const finalExitCap = Math.max(calcExitCap, p.exitCapRate);
+  const exitValue  = exitNOI / (finalExitCap / 100);
+  const sellCostAmt = exitValue * (p.sellingCosts / 100);
+  const netSale    = exitValue - sellCostAmt;
+  const lastLoanBal = isAllCash ? 0 : (projections[p.holdPeriod - 1].loanBalance - projections[p.holdPeriod - 1].principalPayment);
+  const eqReversion = netSale - lastLoanBal;
+
+  // Returns
+  const totalCF    = projections.reduce((s, x) => s + x.cashFlow, 0);
+  const totalReturn = totalCF + eqReversion;
+  const totalProfit = totalReturn - totalInvested;
+  const avgCF       = totalCF / p.holdPeriod;
+  const avgCoc      = (avgCF / totalInvested) * 100;
+  const coc1        = projections.length ? (projections[0].cashFlow / totalInvested) * 100 : 0;
+  const equityMult  = totalReturn / totalInvested;
+
+  // Levered IRR
+  const irrCFs = [-totalInvested, ...projections.map((x, i) =>
+    i === projections.length - 1 ? x.cashFlow + eqReversion : x.cashFlow
+  )];
+  const levIRR = calcIRR(irrCFs);
+
+  // Unlevered IRR
+  const uInvested = p.purchasePrice + totalClosing;
+  const uCFs = [-uInvested, ...projections.map((x, i) =>
+    i === projections.length - 1 ? x.noi + netSale : x.noi
+  )];
+  const ulIRR = calcIRR(uCFs);
+
+  return {
+    yearOneNOI, loanAmount, equity, totalClosing, totalInvested, isAllCash,
+    monthlyPmt, annualDS,
+    coc1, avgCoc, dscr1: projections[0]?.dscr,
+    projections,
+    exitNOI, exitValue, finalExitCap, sellCostAmt, netSale, lastLoanBal, eqReversion,
+    leaseAtExit, capRateExpansion: finalExitCap - p.capRate,
+    totalCF, totalReturn, totalProfit, equityMult,
+    levIRR, ulIRR,
+  };
+}
+
+// ══════════════════════════════════════════════════════
+//  FORMATTING
+// ══════════════════════════════════════════════════════
+const fmt$ = v => isNaN(v) ? '—' : new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits:0 }).format(v);
+const fmtP = v => isNaN(v) ? '—' : v.toFixed(2) + '%';
+const fmtX = v => isNaN(v) ? '—' : v.toFixed(2) + 'x';
+
+// ══════════════════════════════════════════════════════
+//  LEASE HELPERS
+// ══════════════════════════════════════════════════════
+function leaseYearsLeft(expStr) {
+  if (!expStr) return null;
+  const ms = new Date(expStr) - new Date();
+  return ms / (1000 * 60 * 60 * 24 * 365.25);
+}
+function leaseColor(yrs) {
+  if (yrs === null) return 'green';
+  if (yrs < 2)  return 'red';
+  if (yrs < 5)  return 'yellow';
+  return 'green';
+}
+function leaseLabel(yrs) {
+  if (yrs === null) return 'Lease dates not set';
+  const y = Math.floor(yrs);
+  const m = Math.round((yrs - y) * 12);
+  if (yrs < 0)  return 'Expired';
+  if (yrs < 1)  return `${Math.round(yrs * 12)} mo remaining`;
+  return `${y}y ${m}m remaining`;
+}
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  return Math.round((new Date(dateStr) - new Date()) / (1000*60*60*24));
+}
+function nextBumpDate(leaseStart, bumpYears) {
+  if (!leaseStart || !bumpYears) return null;
+  const start = new Date(leaseStart);
+  const now   = new Date();
+  let next = new Date(start);
+  while (next <= now) {
+    next.setFullYear(next.getFullYear() + bumpYears);
+  }
+  return next;
+}
+
+// ══════════════════════════════════════════════════════
+//  PORTFOLIO RENDER
+// ══════════════════════════════════════════════════════
+function renderPortfolio() {
+  load();
+  const grid  = document.getElementById('propGrid');
+  const empty = document.getElementById('emptyState');
+
+  if (properties.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    renderStats([]);
+    return;
+  }
+  empty.style.display = 'none';
+
+  const results = properties.map(p => ({ p, r: calculateAll(p) }));
+  renderStats(results);
+
+  grid.innerHTML = results.map(({ p, r }) => {
+    const yrs   = leaseYearsLeft(p.leaseExpiration);
+    const color = leaseColor(yrs);
+    const lbl   = leaseLabel(yrs);
+    const typeLabel = { freestanding:'Freestanding', inline:'Inline', pad:'Pad Site' }[p.propertyType] || p.propertyType;
+    return `
+      <div class="prop-card lease-${color}" onclick="goDetail(${p.id})">
+        <div class="prop-card-header">
+          <div class="prop-tenant">${esc(p.tenant || 'Unnamed')}</div>
+          <div class="prop-type-badge">${typeLabel}</div>
+        </div>
+        <div class="prop-address">${esc(p.address || '—')}</div>
+        <div class="prop-metrics">
+          <div class="prop-metric"><div class="prop-metric-label">Purchase Price</div><div class="prop-metric-val">${fmt$(p.purchasePrice)}</div></div>
+          <div class="prop-metric"><div class="prop-metric-label">Year 1 NOI</div><div class="prop-metric-val">${fmt$(r.yearOneNOI)}</div></div>
+          <div class="prop-metric"><div class="prop-metric-label">Cap Rate</div><div class="prop-metric-val">${fmtP(p.capRate)}</div></div>
+          <div class="prop-metric"><div class="prop-metric-label">Year 1 CoC</div><div class="prop-metric-val" style="color:var(--success)">${fmtP(r.coc1)}</div></div>
+        </div>
+        <div class="lease-badge ${color}">
+          ${ color==='red' ? '🔴' : color==='yellow' ? '🟡' : '🟢'} ${lbl}
+        </div>
+        <button class="view-btn" onclick="event.stopPropagation(); goDetail(${p.id})">View Details →</button>
+      </div>`;
+  }).join('');
+}
+
+function renderStats(results) {
+  document.getElementById('statCount').textContent = results.length;
+  if (!results.length) {
+    ['statEquity','statCoc','statMult','statNearest'].forEach(id => document.getElementById(id).textContent = '—');
+    return;
+  }
+  const totalEq   = results.reduce((s, { r }) => s + r.totalInvested, 0);
+  const blendCoc  = results.reduce((s, { r }) => s + r.coc1, 0) / results.length;
+  const blendMult = results.reduce((s, { r }) => s + r.equityMult, 0) / results.length;
+
+  // Nearest expiry
+  const withDates = results.filter(({ p }) => p.leaseExpiration);
+  withDates.sort((a, b) => new Date(a.p.leaseExpiration) - new Date(b.p.leaseExpiration));
+  const nearest = withDates[0];
+
+  document.getElementById('statEquity').textContent  = fmt$(totalEq);
+  document.getElementById('statCoc').textContent     = fmtP(blendCoc);
+  document.getElementById('statMult').textContent    = fmtX(blendMult);
+  document.getElementById('statNearest').textContent = nearest
+    ? new Date(nearest.p.leaseExpiration).toLocaleDateString('en-US', { month:'short', year:'numeric' })
+    : '—';
+}
+
+// ══════════════════════════════════════════════════════
+//  DETAIL RENDER
+// ══════════════════════════════════════════════════════
+function renderDetail(p) {
+  const r = calculateAll(p);
+
+  document.getElementById('detailTenant').textContent  = p.tenant || '—';
+  document.getElementById('detailAddress').textContent = p.address || '—';
+
+  // KPIs
+  document.getElementById('kCoc').textContent     = fmtP(r.coc1);
+  document.getElementById('kCocSub').textContent  = 'Avg: ' + fmtP(r.avgCoc);
+  document.getElementById('kIrr').textContent     = fmtP(r.levIRR);
+  document.getElementById('kIrrSub').textContent  = 'Total ROI: ' + fmtP((r.totalProfit / r.totalInvested) * 100);
+  document.getElementById('kMult').textContent    = fmtX(r.equityMult);
+  document.getElementById('kUIrr').textContent    = fmtP(r.ulIRR);
+  document.getElementById('kAvgCoc').textContent  = fmtP(r.avgCoc);
+
+  // ── Lease tracker countdown ──
+  const daysExp  = daysUntil(p.leaseExpiration);
+  const nextBump = nextBumpDate(p.leaseStart, p.rentBumpYears);
+  const daysBump = nextBump ? Math.round((nextBump - new Date()) / (1000*60*60*24)) : null;
+  const expColor = daysExp === null ? 'blue' : daysExp < 365 ? 'red' : daysExp < 730 ? 'yellow' : 'green';
+
+  document.getElementById('countdownGrid').innerHTML = `
+    <div class="countdown-card ${expColor}">
+      <div class="countdown-num">${daysExp !== null ? Math.abs(Math.ceil(daysExp / 365 * 10) / 10).toFixed(1) : '—'}</div>
+      <div class="countdown-unit">years</div>
+      <div class="countdown-lbl">Until Lease Expiry</div>
+    </div>
+    <div class="countdown-card ${daysBump !== null && daysBump < 365 ? 'yellow' : 'blue'}">
+      <div class="countdown-num">${daysBump !== null ? Math.max(0, daysBump) : '—'}</div>
+      <div class="countdown-unit">days</div>
+      <div class="countdown-lbl">Until Next Rent Bump${nextBump ? '<br><small>' + nextBump.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + '</small>' : ''}</div>
+    </div>
+  `;
+
+  const opts = p.renewalOptions || 0;
+  const optYrs = p.renewalYearsEach || 0;
+  document.getElementById('renewalInfo').innerHTML = opts > 0
+    ? `<div style="font-size:0.82rem;color:var(--text-secondary);">📄 ${opts} renewal option${opts>1?'s':''} × ${optYrs} years each = ${opts * optYrs} years of potential extension</div>`
+    : '';
+
+  // ── Lease timeline ──
+  const leaseStart = p.leaseStart ? new Date(p.leaseStart) : null;
+  const leaseExp   = p.leaseExpiration ? new Date(p.leaseExpiration) : null;
+  const now = new Date();
+  let pct = 0;
+  if (leaseStart && leaseExp) {
+    const total = leaseExp - leaseStart;
+    const elapsed = now - leaseStart;
+    pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+  }
+  const tlColor = leaseColor(leaseYearsLeft(p.leaseExpiration));
+  const tlColors = { green: 'var(--success)', yellow: 'var(--warning)', red: 'var(--danger)' };
+  document.getElementById('timelineFilled').style.width    = pct + '%';
+  document.getElementById('timelineFilled').style.background = tlColors[tlColor];
+  document.getElementById('tlStart').textContent = leaseStart ? leaseStart.toLocaleDateString('en-US',{month:'short',year:'numeric'}) : 'Start N/A';
+  document.getElementById('tlExp').textContent   = leaseExp   ? leaseExp.toLocaleDateString('en-US',{month:'short',year:'numeric'})   : 'Exp N/A';
+
+  // Rent bump chips
+  const bumpYrs = p.rentBumpYears || 5;
+  const bumpChips = [];
+  if (leaseStart && p.holdPeriod) {
+    for (let yr = bumpYrs; yr <= (p.leaseTermRemaining || 20); yr += bumpYrs) {
+      const bumpDate = new Date(leaseStart);
+      bumpDate.setFullYear(bumpDate.getFullYear() + yr);
+      bumpChips.push(`<div class="bump-chip">+${p.rentBumpPct || 10}% in ${bumpDate.toLocaleDateString('en-US',{month:'short',year:'numeric'})}</div>`);
+    }
+  }
+  document.getElementById('bumpChips').innerHTML = bumpChips.length ? bumpChips.join('') : '<span style="font-size:0.8rem;color:var(--text-secondary);">Set lease start date to see bump schedule</span>';
+
+  // ── Acquisition Summary ──
+  const acqItems = [
+    ['Purchase Price', fmt$(p.purchasePrice), ''],
+    ['Year 1 NOI',     fmt$(r.yearOneNOI),    ''],
+    ['Cap Rate',       fmtP(p.capRate),       ''],
+    ['Closing Costs',  fmt$(r.totalClosing),  ''],
+    ...(r.isAllCash ? [] : [
+      ['Loan Amount', fmt$(r.loanAmount), ''],
+      ['Equity Required', fmt$(r.equity), ''],
+    ]),
+    ['Total Invested', fmt$(r.totalInvested), 'highlight'],
+  ];
+  document.getElementById('acqGrid').innerHTML = acqItems.map(([l, v, cls]) =>
+    `<div class="metric-item ${cls}"><div class="metric-lbl">${l}</div><div class="metric-val">${v}</div></div>`
+  ).join('');
+
+  // ── Debt Service ──
+  document.getElementById('debtPanel').style.display = r.isAllCash ? 'none' : 'block';
+  if (!r.isAllCash) {
+    document.getElementById('debtGrid').innerHTML = [
+      ['Monthly Payment',   fmt$(r.monthlyPmt), ''],
+      ['Annual Debt Service', fmt$(r.annualDS), ''],
+      ['Year 1 Cash Flow',  fmt$(r.projections[0]?.cashFlow), 'highlight-green'],
+      ['DSCR',              r.dscr1 ? r.dscr1.toFixed(2) + 'x' : '—', ''],
+    ].map(([l, v, cls]) =>
+      `<div class="metric-item ${cls}"><div class="metric-lbl">${l}</div><div class="metric-val">${v}</div></div>`
+    ).join('');
+  }
+
+  // ── Exit Analysis ──
+  document.getElementById('exitGrid').innerHTML = [
+    ['Exit NOI',             fmt$(r.exitNOI), ''],
+    ['Lease Remaining at Exit', (r.leaseAtExit >= 0 ? r.leaseAtExit.toFixed(1) : 'Expired') + ' yrs', ''],
+    ['Entry Cap Rate',       fmtP(p.capRate), ''],
+    ['Exit Cap Rate',        fmtP(r.finalExitCap), ''],
+    ['Cap Rate Expansion',   '+' + fmtP(r.capRateExpansion), ''],
+    ['Sale Price',           fmt$(r.exitValue), ''],
+    ['Selling Costs',        fmt$(r.sellCostAmt), ''],
+    ...(r.isAllCash ? [] : [['Remaining Loan Balance', fmt$(r.lastLoanBal), '']]),
+    ['Equity Reversion',     fmt$(r.eqReversion), 'highlight-green span2'],
+  ].map(([l, v, cls]) =>
+    `<div class="metric-item ${cls}"><div class="metric-lbl">${l}</div><div class="metric-val">${v}</div></div>`
+  ).join('');
+
+  // ── Return Summary ──
+  document.getElementById('returnGrid').innerHTML = [
+    ['Total Cash Flows',  fmt$(r.totalCF),      `= Sum of ${p.holdPeriod} years of cash flows`],
+    ['Equity Reversion',  fmt$(r.eqReversion),  `= Sale - Costs - Loan`],
+    ['Total Return',      fmt$(r.totalReturn),   `= Cash Flows + Equity Reversion`],
+    ['Total Profit',      fmt$(r.totalProfit),   `= Total Return − Initial Investment`],
+    ['Levered IRR',       fmtP(r.levIRR),        'Accounts for debt financing', true],
+    ['Unlevered IRR',     fmtP(r.ulIRR),         'All-cash equivalent return', true],
+    ['Equity Multiple',   fmtX(r.equityMult),    `${fmt$(r.totalReturn)} ÷ ${fmt$(r.totalInvested)}`],
+    ['Avg Cash-on-Cash',  fmtP(r.avgCoc),        `Avg annual cash flow ÷ invested`],
+  ].map(([l, v, sub, hl]) =>
+    `<div class="return-item${hl?' highlight':''}"><div class="return-lbl">${l}</div><div class="return-val">${v}</div><div class="return-sub">${sub}</div></div>`
+  ).join('');
+
+  // ── Projections table ──
+  const tbl = document.getElementById('projTable');
+  const heads = ['Year','NOI', ...(r.isAllCash ? [] : ['Debt Service','DSCR']), 'Cash Flow', ...(r.isAllCash ? [] : ['Loan Balance'])];
+  tbl.innerHTML = `
+    <thead><tr>${heads.map((h, i) => `<th${i===0?' style="text-align:left"':''}>${h}</th>`).join('')}</tr></thead>
+    <tbody>
+      ${r.projections.map(pr => `
+        <tr class="${pr.isRefi ? 'refi-yr' : ''}">
+          <td>${pr.year}${pr.isRefi ? '<span class="refi-tag">REFI</span>' : ''}</td>
+          <td>${fmt$(pr.noi)}</td>
+          ${r.isAllCash ? '' : `<td>${fmt$(pr.debtService)}</td><td>${pr.dscr ? pr.dscr.toFixed(2)+'x' : '—'}</td>`}
+          <td class="${pr.cashFlow >= 0 ? 'pos' : 'neg'}">${fmt$(pr.cashFlow)}</td>
+          ${r.isAllCash ? '' : `<td>${fmt$(pr.loanBalance)}</td>`}
+        </tr>`).join('')}
+    </tbody>`;
+
+  // ── Notes ──
+  const notesPanel = document.getElementById('notesPanel');
+  if (p.notes && p.notes.trim()) {
+    notesPanel.style.display = 'block';
+    document.getElementById('notesText').textContent = p.notes;
+  } else {
+    notesPanel.style.display = 'none';
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  DELETE
+// ══════════════════════════════════════════════════════
+function confirmDelete() { document.getElementById('deleteModal').classList.add('open'); }
+function closeModal()    { document.getElementById('deleteModal').classList.remove('open'); }
+function deleteProperty() {
+  properties = properties.filter(p => p.id !== currentId);
+  save();
+  closeModal();
+  goPortfolio();
+}
+
+// ══════════════════════════════════════════════════════
+//  UTIL
+// ══════════════════════════════════════════════════════
+function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ══════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════
+load();
+renderPortfolio();
+</script>
+</body>
+</html>
