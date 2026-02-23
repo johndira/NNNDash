@@ -730,7 +730,7 @@
       <div class="form-row">
         <div class="form-group">
           <label>Purchase Price ($)</label>
-          <input type="number" id="fPrice" placeholder="2500000" value="2500000">
+          <input type="text" inputmode="numeric" id="fPrice" placeholder="2,500,000" value="2,500,000" class="comma-input">
           <small class="auto-calc-hint" id="hintPrice" style="display:none;">⚡ Auto-calculated from Rent ÷ Cap Rate</small>
         </div>
         <div class="form-group">
@@ -783,7 +783,7 @@
       <div class="form-row">
         <div class="form-group">
           <label>Annual Rent / NOI ($)</label>
-          <input type="number" id="fRent" placeholder="168750">
+          <input type="text" inputmode="numeric" id="fRent" placeholder="168,750" class="comma-input">
           <small class="auto-calc-hint" id="hintRent" style="display:none;">⚡ Auto-calculated from Price × Cap Rate</small>
         </div>
         <div class="form-group"><label>Lease Start Date</label><input type="date" id="fLeaseStart"></div>
@@ -966,8 +966,39 @@ function goDetail(id) {
 //  FORM HELPERS
 // ══════════════════════════════════════════════════════
 function v(id) { return document.getElementById(id).value; }
-function n(id) { return parseFloat(v(id)) || 0; }
+function n(id) { return parseFloat(v(id).replace(/,/g, '')) || 0; }
 function d(id) { return v(id); }
+
+// ── COMMA FORMATTING ────────────────────────────────────
+function addCommas(val) {
+  const num = parseFloat(String(val).replace(/,/g, ''));
+  if (isNaN(num)) return val;
+  return Math.round(num).toLocaleString('en-US');
+}
+function stripCommas(val) {
+  return String(val).replace(/,/g, '');
+}
+function initCommaInputs() {
+  document.querySelectorAll('.comma-input').forEach(el => {
+    // Format on blur
+    el.addEventListener('blur', () => {
+      const raw = parseFloat(stripCommas(el.value));
+      if (!isNaN(raw) && raw > 0) el.value = Math.round(raw).toLocaleString('en-US');
+    });
+    // Strip commas on focus so user can edit cleanly
+    el.addEventListener('focus', () => {
+      el.value = stripCommas(el.value);
+    });
+    // Allow only digits and commas while typing (re-format live)
+    el.addEventListener('input', () => {
+      // Keep cursor friendly — just strip non-numeric chars except decimal
+      const stripped = el.value.replace(/[^0-9]/g, '');
+      if (stripped === '') { el.value = ''; return; }
+      // Only reformat if not focused for a smoother typing feel
+      // (full reformat happens on blur)
+    });
+  });
+}
 
 function setPropType(t) {
   document.getElementById('fPropType').value = t;
@@ -1015,9 +1046,9 @@ function autoCalc(changed) {
   if (changed === 'cap')   setAutoFilled(capEl,   hintCap,   false);
   if (changed === 'rent')  setAutoFilled(rentEl,  hintRent,  false);
 
-  const price = parseFloat(priceEl.value);
+  const price = parseFloat(stripCommas(priceEl.value));
   const cap   = parseFloat(capEl.value);
-  const rent  = parseFloat(rentEl.value);
+  const rent  = parseFloat(stripCommas(rentEl.value));
 
   const hasPrice = !isNaN(price) && price > 0;
   const hasCap   = !isNaN(cap)   && cap   > 0;
@@ -1027,14 +1058,14 @@ function autoCalc(changed) {
     // Price or Cap changed → derive Rent
     if (hasPrice && hasCap) {
       const derived = price * (cap / 100);
-      rentEl.value = Math.round(derived);
+      rentEl.value = Math.round(derived).toLocaleString('en-US');
       setAutoFilled(rentEl, hintRent, true);
     }
   } else if (changed === 'rent') {
     // Rent changed → derive Price (if cap is set)
     if (hasRent && hasCap) {
       const derived = rent / (cap / 100);
-      priceEl.value = Math.round(derived);
+      priceEl.value = Math.round(derived).toLocaleString('en-US');
       setAutoFilled(priceEl, hintPrice, true);
     }
     // Rent changed → derive Cap (if price is set but cap is empty)
@@ -1057,7 +1088,7 @@ function initAutoCalc() {
 
 function resetForm() {
   ['fTenant','fAddress','fNotes','fLeaseStart','fLeaseExp'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('fPrice').value = '2500000';
+  document.getElementById('fPrice').value = '2,500,000';
   document.getElementById('fCapRate').value = '6.75';
   document.getElementById('fClosing').value = '2.5';
   document.getElementById('fSelling').value = '2.0';
@@ -1087,7 +1118,7 @@ function fillForm(p) {
   document.getElementById('fTenant').value       = p.tenant || '';
   document.getElementById('fAddress').value      = p.address || '';
   document.getElementById('fNotes').value        = p.notes || '';
-  document.getElementById('fPrice').value        = p.purchasePrice || '';
+  document.getElementById('fPrice').value        = p.purchasePrice ? Math.round(p.purchasePrice).toLocaleString('en-US') : '';
   document.getElementById('fCapRate').value      = p.capRate || '';
   document.getElementById('fClosing').value      = p.closingCosts || '';
   document.getElementById('fSelling').value      = p.sellingCosts || '';
@@ -1109,7 +1140,7 @@ function fillForm(p) {
   document.getElementById('fRefiRate').value     = p.refiRate || '';
   document.getElementById('fRefiLtv').value      = p.refiLtv || '';
   document.getElementById('fRefiClose').value    = p.refiClosingCosts || '';
-  document.getElementById('fRent').value         = p.annualRent || '';
+  document.getElementById('fRent').value         = p.annualRent ? Math.round(p.annualRent).toLocaleString('en-US') : '';
   setPropType(p.propertyType || 'freestanding');
   setPurchaseType(p.purchaseType || 'financed');
   toggleRefi();
@@ -1578,6 +1609,7 @@ function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;'
 // ══════════════════════════════════════════════════════
 load();
 renderPortfolio();
+initCommaInputs();
 initAutoCalc();
 </script>
 </body>
