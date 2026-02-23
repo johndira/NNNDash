@@ -385,6 +385,20 @@
   .financing-section { display: none; }
   .financing-section.show { display: block; }
 
+  /* Auto-calculated field highlight */
+  input.auto-filled {
+    border-color: var(--primary) !important;
+    background: rgba(10,132,255,0.06) !important;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .auto-calc-hint {
+    font-size: 0.72rem;
+    color: var(--primary);
+    margin-top: 0.25rem;
+    display: block;
+    font-weight: 500;
+  }
+
   /* ── DETAIL PAGE ──────────────────────────── */
   .detail-wrap {
     max-width: 1200px;
@@ -714,8 +728,16 @@
     <div class="form-section">
       <div class="form-section-title">Acquisition</div>
       <div class="form-row">
-        <div class="form-group"><label>Purchase Price ($)</label><input type="number" id="fPrice" placeholder="2500000" value="2500000"></div>
-        <div class="form-group"><label>Cap Rate (%)</label><input type="number" id="fCapRate" placeholder="6.75" step="0.05" value="6.75"></div>
+        <div class="form-group">
+          <label>Purchase Price ($)</label>
+          <input type="number" id="fPrice" placeholder="2500000" value="2500000">
+          <small class="auto-calc-hint" id="hintPrice" style="display:none;">⚡ Auto-calculated from Rent ÷ Cap Rate</small>
+        </div>
+        <div class="form-group">
+          <label>Cap Rate (%)</label>
+          <input type="number" id="fCapRate" placeholder="6.75" step="0.05" value="6.75">
+          <small class="auto-calc-hint" id="hintCap" style="display:none;">⚡ Auto-calculated from Rent ÷ Price</small>
+        </div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Closing Costs (%)</label><input type="number" id="fClosing" placeholder="2.5" step="0.1" value="2.5"></div>
@@ -759,7 +781,11 @@
     <div class="form-section">
       <div class="form-section-title">Lease</div>
       <div class="form-row">
-        <div class="form-group"><label>Annual Rent / NOI ($)</label><input type="number" id="fRent" placeholder="168750"></div>
+        <div class="form-group">
+          <label>Annual Rent / NOI ($)</label>
+          <input type="number" id="fRent" placeholder="168750">
+          <small class="auto-calc-hint" id="hintRent" style="display:none;">⚡ Auto-calculated from Price × Cap Rate</small>
+        </div>
         <div class="form-group"><label>Lease Start Date</label><input type="date" id="fLeaseStart"></div>
       </div>
       <div class="form-row">
@@ -954,6 +980,79 @@ function setPurchaseType(t) {
 }
 function toggleRefi() {
   document.getElementById('refiSection').classList.toggle('show', document.getElementById('fRefi').checked);
+}
+
+// ── AUTO-CALCULATE: Price / Cap Rate / Rent ──────────────
+// Formula: NOI = Price × (CapRate / 100)
+// So:      Price = NOI / (CapRate / 100)
+//          CapRate = (NOI / Price) × 100
+
+let _autoCalcLock = false; // prevent re-entrant updates
+
+function setAutoFilled(el, hintEl, isAuto) {
+  if (isAuto) {
+    el.classList.add('auto-filled');
+    hintEl.style.display = 'block';
+  } else {
+    el.classList.remove('auto-filled');
+    hintEl.style.display = 'none';
+  }
+}
+
+function autoCalc(changed) {
+  if (_autoCalcLock) return;
+  _autoCalcLock = true;
+
+  const priceEl     = document.getElementById('fPrice');
+  const capEl       = document.getElementById('fCapRate');
+  const rentEl      = document.getElementById('fRent');
+  const hintPrice   = document.getElementById('hintPrice');
+  const hintCap     = document.getElementById('hintCap');
+  const hintRent    = document.getElementById('hintRent');
+
+  // Clear auto-filled state on the field the user just typed into
+  if (changed === 'price') setAutoFilled(priceEl, hintPrice, false);
+  if (changed === 'cap')   setAutoFilled(capEl,   hintCap,   false);
+  if (changed === 'rent')  setAutoFilled(rentEl,  hintRent,  false);
+
+  const price = parseFloat(priceEl.value);
+  const cap   = parseFloat(capEl.value);
+  const rent  = parseFloat(rentEl.value);
+
+  const hasPrice = !isNaN(price) && price > 0;
+  const hasCap   = !isNaN(cap)   && cap   > 0;
+  const hasRent  = !isNaN(rent)  && rent  > 0;
+
+  if (changed === 'price' || changed === 'cap') {
+    // Price or Cap changed → derive Rent
+    if (hasPrice && hasCap) {
+      const derived = price * (cap / 100);
+      rentEl.value = Math.round(derived);
+      setAutoFilled(rentEl, hintRent, true);
+    }
+  } else if (changed === 'rent') {
+    // Rent changed → derive Price (if cap is set)
+    if (hasRent && hasCap) {
+      const derived = rent / (cap / 100);
+      priceEl.value = Math.round(derived);
+      setAutoFilled(priceEl, hintPrice, true);
+    }
+    // Rent changed → derive Cap (if price is set but cap is empty)
+    else if (hasRent && hasPrice && !hasCap) {
+      const derived = (rent / price) * 100;
+      capEl.value = derived.toFixed(2);
+      setAutoFilled(capEl, hintCap, true);
+    }
+  }
+
+  _autoCalcLock = false;
+}
+
+// Attach listeners after DOM ready (called in init)
+function initAutoCalc() {
+  document.getElementById('fPrice').addEventListener('input',   () => autoCalc('price'));
+  document.getElementById('fCapRate').addEventListener('input', () => autoCalc('cap'));
+  document.getElementById('fRent').addEventListener('input',    () => autoCalc('rent'));
 }
 
 function resetForm() {
@@ -1479,6 +1578,7 @@ function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;'
 // ══════════════════════════════════════════════════════
 load();
 renderPortfolio();
+initAutoCalc();
 </script>
 </body>
 </html>
