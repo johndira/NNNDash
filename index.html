@@ -1451,9 +1451,28 @@ function renderDetail(p) {
 
   // ── Lease tracker countdown ──
   const daysExp  = daysUntil(p.leaseExpiration);
-  const nextBump = nextBumpDate(p.leaseStart, p.rentBumpYears);
-  const daysBump = nextBump ? Math.round((nextBump - new Date()) / (1000*60*60*24)) : null;
+  const now = new Date();
+  const leaseStartDate = p.leaseStart ? new Date(p.leaseStart) : null;
+  const rentCommenced  = leaseStartDate && leaseStartDate <= now;
+
+  const nextBump = rentCommenced ? nextBumpDate(p.leaseStart, p.rentBumpYears) : null;
+  const daysBump = nextBump ? Math.round((nextBump - now) / (1000*60*60*24)) : null;
+  const daysToStart = leaseStartDate && !rentCommenced ? Math.round((leaseStartDate - now) / (1000*60*60*24)) : null;
+
   const expColor = daysExp === null ? 'blue' : daysExp < 365 ? 'red' : daysExp < 730 ? 'yellow' : 'green';
+
+  // Second card: show rent commencement countdown if lease hasn't started yet
+  const secondCardColor = !rentCommenced
+    ? (daysToStart !== null && daysToStart < 180 ? 'yellow' : 'blue')
+    : (daysBump !== null && daysBump < 365 ? 'yellow' : 'blue');
+
+  const secondCardNum = !rentCommenced
+    ? (daysToStart !== null ? daysToStart : '—')
+    : (daysBump !== null ? Math.max(0, daysBump) : '—');
+
+  const secondCardLabel = !rentCommenced
+    ? `Rent Commencement${leaseStartDate ? '<br><small>' + leaseStartDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + '</small>' : ''}`
+    : `Until Next Rent Bump${nextBump ? '<br><small>' + nextBump.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + '</small>' : ''}`;
 
   document.getElementById('countdownGrid').innerHTML = `
     <div class="countdown-card ${expColor}">
@@ -1461,10 +1480,10 @@ function renderDetail(p) {
       <div class="countdown-unit">years</div>
       <div class="countdown-lbl">Until Lease Expiry</div>
     </div>
-    <div class="countdown-card ${daysBump !== null && daysBump < 365 ? 'yellow' : 'blue'}">
-      <div class="countdown-num">${daysBump !== null ? Math.max(0, daysBump) : '—'}</div>
+    <div class="countdown-card ${secondCardColor}">
+      <div class="countdown-num">${secondCardNum}</div>
       <div class="countdown-unit">days</div>
-      <div class="countdown-lbl">Until Next Rent Bump${nextBump ? '<br><small>' + nextBump.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + '</small>' : ''}</div>
+      <div class="countdown-lbl">${secondCardLabel}</div>
     </div>
   `;
 
