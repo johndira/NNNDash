@@ -14,7 +14,7 @@
     --primary-dark:  #0066CC;
     --success:       #30D158;
     --warning:       #FF9F0A;
-    --danger:        #FF453A;
+    --danger:        #FF453A
     --text-primary:  #1C1C1E;
     --text-secondary:#6E6E73;
     --border:        #E5E5EA;
@@ -1496,8 +1496,7 @@ function renderDetail(p) {
   // ── Lease timeline ──
   const leaseStart = p.leaseStart ? new Date(p.leaseStart) : null;
   const leaseExp   = p.leaseExpiration ? new Date(p.leaseExpiration) : null;
-  const now = new Date();
-  let pct = 0;
+    let pct = 0;
   if (leaseStart && leaseExp) {
     const total = leaseExp - leaseStart;
     const elapsed = now - leaseStart;
