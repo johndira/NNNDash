@@ -1625,7 +1625,76 @@ function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;'
 // ══════════════════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════════════════
+const DEFAULT_PROPERTIES = [
+  {
+    id: 1,
+    tenant: 'Chick-fil-A',
+    address: '41910 Jackson Street, Indio, CA',
+    propertyType: 'freestanding',
+    purchasePrice: 5301205,
+    capRate: 4.15,
+    closingCosts: 2.5,
+    sellingCosts: 2.0,
+    purchaseType: 'all-cash',
+    ltv: 0,
+    interestRate: 0,
+    loanTerm: 25,
+    annualRent: 220000,
+    leaseStart: '2010-10-01',
+    leaseExpiration: '2025-10-01',
+    leaseTermRemaining: 15,
+    rentBumpYears: 5,
+    rentBumpPct: 10,
+    renewalOptions: 0,
+    renewalYearsEach: 5,
+    capRateExpansionPerYear: 0.15,
+    holdPeriod: 10,
+    exitCapRate: 5.5,
+    refinance: false,
+    refiYear: 5,
+    refiRate: 5.0,
+    refiLtv: 65,
+    refiClosingCosts: 1.5,
+    notes: 'GL - None. Q4 2025 Map Link.'
+  },
+  {
+    id: 2,
+    tenant: 'Chase Bank',
+    address: 'NWC Pomona & Chapman, Fullerton, CA',
+    propertyType: 'freestanding',
+    purchasePrice: 7125000,
+    capRate: 4.00,
+    closingCosts: 2.5,
+    sellingCosts: 2.0,
+    purchaseType: 'all-cash',
+    ltv: 0,
+    interestRate: 0,
+    loanTerm: 25,
+    annualRent: 285000,
+    leaseStart: '2009-05-01',
+    leaseExpiration: '2024-05-01',
+    leaseTermRemaining: 15,
+    rentBumpYears: 5,
+    rentBumpPct: 10,
+    renewalOptions: 0,
+    renewalYearsEach: 5,
+    capRateExpansionPerYear: 0.15,
+    holdPeriod: 10,
+    exitCapRate: 5.5,
+    refinance: false,
+    refiYear: 5,
+    refiRate: 5.0,
+    refiLtv: 65,
+    refiClosingCosts: 1.5,
+    notes: 'GL - None. May 2024 Comm Map Link.'
+  }
+];
+
 load();
+if (properties.length === 0) {
+  properties = DEFAULT_PROPERTIES;
+  save();
+}
 renderPortfolio();
 initCommaInputs();
 initAutoCalc();
