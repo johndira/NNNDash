@@ -1466,9 +1466,27 @@ function renderDetail(p) {
     ? (daysToStart !== null && daysToStart < 180 ? 'yellow' : 'blue')
     : (daysBump !== null && daysBump < 365 ? 'yellow' : 'blue');
 
-  const secondCardNum = !rentCommenced
-    ? (daysToStart !== null ? daysToStart : '—')
-    : (daysBump !== null ? Math.max(0, daysBump) : '—');
+  // Format bump countdown: years if >=1yr, months if >=1mo, days if <1mo
+  let bumpDisplayNum, bumpDisplayUnit;
+  if (!rentCommenced) {
+    bumpDisplayNum = daysToStart !== null ? daysToStart : '—';
+    bumpDisplayUnit = 'days';
+  } else if (daysBump === null) {
+    bumpDisplayNum = '—';
+    bumpDisplayUnit = 'days';
+  } else {
+    const bumpDaysVal = Math.max(0, daysBump);
+    if (bumpDaysVal >= 365) {
+      bumpDisplayNum = (bumpDaysVal / 365.25).toFixed(1);
+      bumpDisplayUnit = 'years';
+    } else if (bumpDaysVal >= 30) {
+      bumpDisplayNum = Math.round(bumpDaysVal / 30.44);
+      bumpDisplayUnit = 'months';
+    } else {
+      bumpDisplayNum = bumpDaysVal;
+      bumpDisplayUnit = 'days';
+    }
+  }
 
   const secondCardLabel = !rentCommenced
     ? `Rent Commencement${leaseStartDate ? '<br><small>' + leaseStartDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + '</small>' : ''}`
@@ -1481,8 +1499,8 @@ function renderDetail(p) {
       <div class="countdown-lbl">Until Lease Expiry</div>
     </div>
     <div class="countdown-card ${secondCardColor}">
-      <div class="countdown-num">${secondCardNum}</div>
-      <div class="countdown-unit">days</div>
+      <div class="countdown-num">${bumpDisplayNum}</div>
+      <div class="countdown-unit">${bumpDisplayUnit}</div>
       <div class="countdown-lbl">${secondCardLabel}</div>
     </div>
   `;
@@ -1640,8 +1658,8 @@ const DEFAULT_PROPERTIES = [
     interestRate: 0,
     loanTerm: 25,
     annualRent: 220000,
-    leaseStart: '2010-10-01',
-    leaseExpiration: '2025-10-01',
+    leaseStart: '2026-04-01',
+    leaseExpiration: '2041-04-01',
     leaseTermRemaining: 15,
     rentBumpYears: 5,
     rentBumpPct: 10,
@@ -1671,8 +1689,8 @@ const DEFAULT_PROPERTIES = [
     interestRate: 0,
     loanTerm: 25,
     annualRent: 285000,
-    leaseStart: '2009-05-01',
-    leaseExpiration: '2024-05-01',
+    leaseStart: '2026-04-01',
+    leaseExpiration: '2041-04-01',
     leaseTermRemaining: 15,
     rentBumpYears: 5,
     rentBumpPct: 10,
