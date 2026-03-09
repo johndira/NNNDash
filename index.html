@@ -887,13 +887,7 @@
         <div class="result-panel">
           <h3>🚪 Exit Analysis</h3>
           <div class="metric-grid" id="exitGrid"><!-- JS --></div>
-        </div>
-
-        <!-- Returns -->
-        <div class="return-panel">
-          <h3>📈 Investment Return Summary</h3>
-          <div class="return-grid" id="returnGrid"><!-- JS --></div>
-        </div>
+        </div></div>
 
       </div>
 
@@ -907,6 +901,10 @@
           <h3>📝 Notes</h3>
           <p id="notesText" style="font-size:0.9rem; color:var(--text-secondary); line-height:1.6;"></p>
         </div>
+        <div class="return-panel">
+          <h3>📈 Investment Return Summary</h3>
+          <div class="return-grid" id="returnGrid"><!-- JS --></div>
+        
       </div>
     </div>
   </div>
@@ -1615,12 +1613,8 @@ function renderDetail(p) {
 
   // ── Notes ──
   const notesPanel = document.getElementById('notesPanel');
-  if (p.notes && p.notes.trim()) {
-    notesPanel.style.display = 'block';
-    document.getElementById('notesText').textContent = p.notes;
-  } else {
-    notesPanel.style.display = 'none';
-  }
+  notesPanel.style.display = 'block';
+  document.getElementById('notesText').textContent = p.notes || '';
 }
 
 // ══════════════════════════════════════════════════════
@@ -1673,7 +1667,7 @@ const DEFAULT_PROPERTIES = [
     refiRate: 5.0,
     refiLtv: 65,
     refiClosingCosts: 1.5,
-    notes: 'GL - None. Q4 2025 Map Link.'
+    notes: ''
   },
   {
     id: 2,
@@ -1704,7 +1698,7 @@ const DEFAULT_PROPERTIES = [
     refiRate: 5.0,
     refiLtv: 65,
     refiClosingCosts: 1.5,
-    notes: 'GL - None. May 2024 Comm Map Link.'
+    notes: ''
   }
 ];
 
